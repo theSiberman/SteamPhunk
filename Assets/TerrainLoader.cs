@@ -18,6 +18,7 @@ public class TerrainTile
     public int worldX;
     public int worldZ;
 
+
     public TerrainTile(int tilex, int tiley, int wldz, int wldx)  
     {
         x = tilex;
@@ -28,21 +29,59 @@ public class TerrainTile
     }
 }
 
+public struct TextureUrls {
+	public string altimiterUrl;
+	public string diffuseUrl;
+}
+
 public class TerrainLoader : MonoBehaviour {
     public string baseUrl;
 
-    public int tileSize = 256;
-    public int terrainSize = 256;
-    public int terrainResolution = 2048;
-    public int terrainHeight = 100;
+	public enum Planet{MARS,VESTA};
 
-    public int tileMargin;
-    public int startX;
-    public int startY;
+	public Planet planet;
+
+	public int tileSize = 256;
+	public int terrainSize = 256;
+	public int terrainResolution = 2048;
+	public int terrainHeight = 100;
+
+	public int tileMargin;
+	public int startX;
+	public int startY;
 
 	public bool flatTerrain = false;
 
-    public Dictionary<string, TerrainTile> worldTiles = new Dictionary<string, TerrainTile>();
+	public Dictionary<string, TerrainTile> worldTiles = new Dictionary<string, TerrainTile>();
+
+	private TextureUrls urls (Planet planet) {
+		switch(planet){
+		case Planet.MARS:
+			TextureUrls marsUrls = new TextureUrls();
+			//DEM Grayscale - Mars Orbiter Laser Altimeter
+			marsUrls.altimiterUrl = "https://api.nasa.gov/mars-wmts/catalog/Mars_MGS_MOLA_DEM_mosaic_global_463m_8/1.0.0//default/default028mm/";
+			//Atlas Mosaic - Mars Orbiter Camera
+			marsUrls.diffuseUrl = "https://api.nasa.gov/mars-wmts/catalog/msss_atlas_simp_clon/1.0.0//default/default028mm/";
+			return marsUrls;
+
+		case Planet.VESTA:
+			TextureUrls vestaUrls = new TextureUrls();
+			//DEM Grayscale - Mars Orbiter Laser Altimeter
+			vestaUrls.altimiterUrl = "https://api.nasa.gov/mars-wmts/catalog/Mars_MGS_MOLA_DEM_mosaic_global_463m_8/1.0.0//default/default028mm/";
+			//Atlas Mosaic - Mars Orbiter Camera
+			vestaUrls.diffuseUrl = "https://api.nasa.gov/mars-wmts/catalog/msss_atlas_simp_clon/1.0.0//default/default028mm/";
+			return vestaUrls;
+
+			default:
+			TextureUrls urls = new TextureUrls();
+			//DEM Grayscale - Mars Orbiter Laser Altimeter
+			urls.altimiterUrl = "https://api.nasa.gov/mars-wmts/catalog/Mars_MGS_MOLA_DEM_mosaic_global_463m_8/1.0.0//default/default028mm/";
+			//Atlas Mosaic - Mars Orbiter Camera
+			urls.diffuseUrl = "https://api.nasa.gov/mars-wmts/catalog/msss_atlas_simp_clon/1.0.0//default/default028mm/";
+			return urls;
+		}
+	}
+
 
     IEnumerator loadTerrainTile(TerrainTile tile)
     {
@@ -52,7 +91,7 @@ public class TerrainLoader : MonoBehaviour {
         terrainData.alphamapResolution = tileSize;
 
         // Download the tile heightmap
-        tile.url = baseUrl + tile.z + "/" + tile.x + "/" + tile.y + ".png";
+		tile.url = urls(planet).altimiterUrl + tile.z + "/" + tile.x + "/" + tile.y + ".png";
         WWW www = new WWW(tile.url);
         while (!www.isDone) { }
         tile.heightmap = new Texture2D(terrainResolution, terrainResolution); //2049
@@ -151,11 +190,12 @@ public class TerrainLoader : MonoBehaviour {
 
         foreach(TerrainTile tile in worldTiles.Values)
         {
-			Debug.Log("tile" + tile);
-			TerrainTextures _texture = GetComponent<TerrainTextures>();
-			Terrain _terrain = tile.terrain.GetComponent<Terrain>();
-			TerrainData _data = _terrain.terrainData;
-			_texture.setTextures(_data);
+//			Debug.Log("tile" + tile);
+//			TerrainTextures _texture = GetComponent<TerrainTextures>();
+//			Terrain _terrain = tile.terrain.GetComponent<Terrain>();
+//			TerrainData _data = _terrain.terrainData;
+//			_texture.setTextures(_data);
+			GetComponent<TerrainTextures>().setTextures(tile.terrain.GetComponent<Terrain>().terrainData);
         }
         
     }
