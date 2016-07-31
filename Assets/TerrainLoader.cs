@@ -101,13 +101,17 @@ public class TerrainLoader : MonoBehaviour {
 		www = new WWW(urls(planet).diffuseUrl + tile.z + "/" + tile.x + "/" + tile.y + ".png");
 		while (!www.isDone) { }
 		tile.diffuseMap = new Texture2D(terrainResolution, terrainResolution); //2049
+		tile.diffuseMap.mipMapBias = -0.5f;
 		www.LoadImageIntoTexture(tile.diffuseMap);
     
         // Multidimensional array of this tiles heights in x/y
         float[,] terrainHeights = terrainData.GetHeights(0, 0, terrainResolution + 1, terrainResolution + 1);
 
-        // Load colors into byte array
-        Color[] pixelByteArray = tile.heightmap.GetPixels();
+        // Load altimiter colors into byte array
+		Color[] altimiterPixelByteArray = tile.heightmap.GetPixels();
+
+		// Load diffuse colors into byte array
+		Color[] diffusePixelByteArray = tile.heightmap.GetPixels();
 
         if (flatTerrain)
         {
@@ -121,25 +125,26 @@ public class TerrainLoader : MonoBehaviour {
         }
         else
         {
+			//This function seems to be scaling the altimiter resolution up to the desired texture resolution
             for (int y = 0; y <= terrainResolution; y++)
             {
                 for (int x = 0; x <= terrainResolution; x++)
                 {
                     if (x == terrainResolution && y == terrainResolution)
                     {
-                        terrainHeights[y, x] = pixelByteArray[(y - 1) * tileSize + (x - 1)].grayscale;
+						terrainHeights[y, x] = altimiterPixelByteArray[(y - 1) * tileSize + (x - 1)].grayscale;
                     }
                     else if (x == terrainResolution)
                     {
-                        terrainHeights[y, x] = pixelByteArray[(y) * tileSize + (x - 1)].grayscale;
+						terrainHeights[y, x] = altimiterPixelByteArray[(y) * tileSize + (x - 1)].grayscale;
                     }
                     else if (y == terrainResolution)
                     {
-                        terrainHeights[y, x] = pixelByteArray[((y - 1) * tileSize) + x].grayscale;
+						terrainHeights[y, x] = altimiterPixelByteArray[((y - 1) * tileSize) + x].grayscale;
                     }
                     else
                     {
-                        terrainHeights[y, x] = pixelByteArray[y * tileSize + x].grayscale;
+						terrainHeights[y, x] = altimiterPixelByteArray[y * tileSize + x].grayscale;
                     }
                 }
             }

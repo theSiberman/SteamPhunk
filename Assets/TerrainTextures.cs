@@ -13,26 +13,30 @@ using System.Linq; // used for Sum of array
 
 	public void setTextures(TerrainData terrainData, Texture2D diffuseMap)
         {
-            var flatSplat = new SplatPrototype();
-            var steepSplat = new SplatPrototype();
-            var baseSplat = new SplatPrototype();
+        var flatSplat = new SplatPrototype();
+        var steepSplat = new SplatPrototype();
+        var baseSplat = new SplatPrototype();
 
-			baseSplat.texture = diffuseMap;
-            baseSplat.normalMap = baseNormal;
+		baseSplat.texture = diffuseMap;
+		baseSplat.normalMap = diffuseMap;
+		baseSplat.tileSize = new Vector2( 2048, 2048 );
 
-            flatSplat.texture = flatTexture;
-            flatSplat.normalMap = flatNormal;
+		flatSplat.texture = diffuseMap;
+		flatSplat.normalMap = diffuseMap;
+		flatSplat.tileSize = new Vector2( 2048, 2048 );
 
-            steepSplat.texture = steepTexture;
-            steepSplat.normalMap = steepNormal;
+		steepSplat.texture = diffuseMap;
+		steepSplat.normalMap = diffuseMap;
+		steepSplat.tileSize = new Vector2( 2048, 2048 );
 
-            terrainData.splatPrototypes = new SplatPrototype[]
-            {
-                baseSplat,
-                flatSplat,
-                flatSplat,
-                steepSplat
-            };
+        terrainData.splatPrototypes = new SplatPrototype[]
+        {
+            baseSplat,
+            flatSplat,
+            flatSplat,
+            steepSplat
+        };
+		Debug.Log(terrainData.alphamapWidth);
 
             // Splatmap data is stored internally as a 3d array of floats, so declare a new empty array ready for your custom splatmap data:
             float[,,] splatmapData = new float[terrainData.alphamapWidth, terrainData.alphamapHeight, terrainData.alphamapLayers];
