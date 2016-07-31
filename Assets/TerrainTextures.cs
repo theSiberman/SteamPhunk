@@ -22,11 +22,11 @@ using System.Linq; // used for Sum of array
 		baseSplat.tileSize = new Vector2( 2048, 2048 );
 
 		flatSplat.texture = diffuseMap;
-		flatSplat.normalMap = diffuseMap;
+		flatSplat.normalMap = steepNormal;
 		flatSplat.tileSize = new Vector2( 2048, 2048 );
 
-		steepSplat.texture = diffuseMap;
-		steepSplat.normalMap = diffuseMap;
+		steepSplat.texture = flatTexture;
+		steepSplat.normalMap = flatNormal;
 		steepSplat.tileSize = new Vector2( 2048, 2048 );
 
         terrainData.splatPrototypes = new SplatPrototype[]
@@ -64,7 +64,7 @@ using System.Linq; // used for Sum of array
                     // CHANGE THE RULES BELOW TO SET THE WEIGHTS OF EACH TEXTURE ON WHATEVER RULES YOU WANT
 
                     // Texture[0] has constant influence
-                    splatWeights[0] = 0.5f;
+                    splatWeights[0] = 0.9f;
 
                     // Texture[1] is stronger at lower altitudes
                     splatWeights[1] = Mathf.Clamp01((terrainData.heightmapHeight - height));
