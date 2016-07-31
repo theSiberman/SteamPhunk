@@ -11,13 +11,13 @@ using System.Linq; // used for Sum of array
         public Texture2D baseTexture;
         public Texture2D baseNormal;
 
-        public void setTextures(TerrainData terrainData)
+	public void setTextures(TerrainData terrainData, Texture2D diffuseMap)
         {
             var flatSplat = new SplatPrototype();
             var steepSplat = new SplatPrototype();
             var baseSplat = new SplatPrototype();
 
-            baseSplat.texture = baseTexture;
+			baseSplat.texture = diffuseMap;
             baseSplat.normalMap = baseNormal;
 
             flatSplat.texture = flatTexture;

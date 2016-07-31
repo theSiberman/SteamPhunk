@@ -10,7 +10,8 @@ public class TerrainTile
 {
     public GameObject terrain;
     public Texture2D heightmap;
-    public string url;
+	public Texture2D diffuseMap;
+//    public string url;
     public int x;
     public int y;
     public int z;
@@ -35,8 +36,6 @@ public struct TextureUrls {
 }
 
 public class TerrainLoader : MonoBehaviour {
-    public string baseUrl;
-
 	public enum Planet{MARS,VESTA};
 
 	public Planet planet;
@@ -91,11 +90,18 @@ public class TerrainLoader : MonoBehaviour {
         terrainData.alphamapResolution = tileSize;
 
         // Download the tile heightmap
-		tile.url = urls(planet).altimiterUrl + tile.z + "/" + tile.x + "/" + tile.y + ".png";
-        WWW www = new WWW(tile.url);
+//		tile.url = urls(planet).altimiterUrl + tile.z + "/" + tile.x + "/" + tile.y + ".png";
+		WWW www = new WWW(urls(planet).altimiterUrl + tile.z + "/" + tile.x + "/" + tile.y + ".png");
         while (!www.isDone) { }
         tile.heightmap = new Texture2D(terrainResolution, terrainResolution); //2049
         www.LoadImageIntoTexture(tile.heightmap);
+
+		// Download the tile diffusemap
+//		tile.url = urls(planet) + tile.z + "/" + tile.x + "/" + tile.y + ".png";
+		www = new WWW(urls(planet).diffuseUrl + tile.z + "/" + tile.x + "/" + tile.y + ".png");
+		while (!www.isDone) { }
+		tile.diffuseMap = new Texture2D(terrainResolution, terrainResolution); //2049
+		www.LoadImageIntoTexture(tile.diffuseMap);
     
         // Multidimensional array of this tiles heights in x/y
         float[,] terrainHeights = terrainData.GetHeights(0, 0, terrainResolution + 1, terrainResolution + 1);
@@ -195,7 +201,7 @@ public class TerrainLoader : MonoBehaviour {
 //			Terrain _terrain = tile.terrain.GetComponent<Terrain>();
 //			TerrainData _data = _terrain.terrainData;
 //			_texture.setTextures(_data);
-			GetComponent<TerrainTextures>().setTextures(tile.terrain.GetComponent<Terrain>().terrainData);
+			GetComponent<TerrainTextures>().setTextures(tile.terrain.GetComponent<Terrain>().terrainData, tile.diffuseMap);
         }
         
     }
