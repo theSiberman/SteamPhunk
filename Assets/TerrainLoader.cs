@@ -146,9 +146,16 @@ public class TerrainLoader : MonoBehaviour {
         TerrainStitchEditor t = new TerrainStitchEditor();
         t.StitchTerrain();
 
+		Debug.Log(worldTiles.Count);
+		Debug.Log(worldTiles.Values);
+
         foreach(TerrainTile tile in worldTiles.Values)
         {
-            GetComponent<TerrainTextures>().setTextures(tile.terrain.GetComponent<Terrain>().terrainData);
+			Debug.Log("tile" + tile);
+			TerrainTextures _texture = GetComponent<TerrainTextures>();
+			Terrain _terrain = tile.terrain.GetComponent<Terrain>();
+			TerrainData _data = _terrain.terrainData;
+			_texture.setTextures(_data);
         }
         
     }
