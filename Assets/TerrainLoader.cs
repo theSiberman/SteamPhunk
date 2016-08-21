@@ -4,6 +4,8 @@ using System.Collections;
 using System.Collections.Generic;
 using CSML;
 using TerrainStitch;
+using System.IO;
+
 
 [System.Serializable]
 public class TerrainTile
@@ -30,14 +32,15 @@ public class TerrainTile
     }
 }
 
-public struct TextureUrls {
+public class TextureUrls {
 	public string altimiterUrl;
 	public string diffuseUrl;
 }
 
 public class TerrainLoader : MonoBehaviour {
+	//This is where available planets are entered, in the enum declaration
+	//The next line declares a public Planet called planet which is exposed in the editor
 	public enum Planet{MARS,VESTA};
-
 	public Planet planet;
 
 	public int tileSize = 256;
@@ -49,10 +52,15 @@ public class TerrainLoader : MonoBehaviour {
 	public int startX;
 	public int startY;
 
+	public bool updateCache = false;
 	public bool flatTerrain = false;
 
 	public Dictionary<string, TerrainTile> worldTiles = new Dictionary<string, TerrainTile>();
 
+
+	//This switches the urls based on the selected planet, any new planet added to the enum will
+	//need a case here populated with the relevant links, otherwise it will revert to the default case
+	//and load the Mars textures
 	private TextureUrls urls (Planet planet) {
 		switch(planet){
 		case Planet.MARS:
@@ -81,6 +89,24 @@ public class TerrainLoader : MonoBehaviour {
 		}
 	}
 
+	//Check image cache for tile, download and add if not existing, else use cache if updateCache flag not set.
+	private Texture2D cachedOrWebTexture (Planet planet, string type, string tileImagePath, string url) {
+		Texture2D texture = new Texture2D(terrainResolution, terrainResolution);
+		string filePath = Application.persistentDataPath + "/" + planet.ToString() + "_" + type + "_" + tileImagePath.Replace("/","_");
+
+		//Get the cached file
+		if( System.IO.File.Exists( filePath ) ){
+			texture.LoadImage(File.ReadAllBytes( filePath ));
+		} else {
+			// Download the tile texture of type = type using the urls returned from the 'urls' method which switches on the
+			// planet passed to it, in this case, the one selected in the inspector ( the public planet )
+			WWW www = new WWW(url + tileImagePath);
+			while (!www.isDone) { }
+			www.LoadImageIntoTexture(texture);
+			System.IO.File.WriteAllBytes(filePath, texture.EncodeToPNG());
+		}
+		return texture;
+	}
 
     IEnumerator loadTerrainTile(TerrainTile tile)
     {
@@ -89,21 +115,11 @@ public class TerrainLoader : MonoBehaviour {
         terrainData.heightmapResolution = terrainResolution;
         terrainData.alphamapResolution = tileSize;
 
-        // Download the tile heightmap
-//		tile.url = urls(planet).altimiterUrl + tile.z + "/" + tile.x + "/" + tile.y + ".png";
-		WWW www = new WWW(urls(planet).altimiterUrl + tile.z + "/" + tile.x + "/" + tile.y + ".png");
-        while (!www.isDone) { }
-        tile.heightmap = new Texture2D(terrainResolution, terrainResolution); //2049
-        www.LoadImageIntoTexture(tile.heightmap);
+		string tileImagePath = tile.z + "/" + tile.x + "/" + tile.y + ".png";
 
-		// Download the tile diffusemap
-//		tile.url = urls(planet) + tile.z + "/" + tile.x + "/" + tile.y + ".png";
-		www = new WWW(urls(planet).diffuseUrl + tile.z + "/" + tile.x + "/" + tile.y + ".png");
-		while (!www.isDone) { }
-		tile.diffuseMap = new Texture2D(terrainResolution, terrainResolution); //2049
-		tile.diffuseMap.mipMapBias = -0.5f;
-		www.LoadImageIntoTexture(tile.diffuseMap);
-    
+		tile.heightmap = cachedOrWebTexture( planet, "heightmap", tileImagePath, urls(planet).altimiterUrl );
+		tile.diffuseMap = cachedOrWebTexture( planet, "diffusemap", tileImagePath, urls(planet).diffuseUrl );
+
         // Multidimensional array of this tiles heights in x/y
         float[,] terrainHeights = terrainData.GetHeights(0, 0, terrainResolution + 1, terrainResolution + 1);
 
@@ -206,7 +222,7 @@ public class TerrainLoader : MonoBehaviour {
 //			Terrain _terrain = tile.terrain.GetComponent<Terrain>();
 //			TerrainData _data = _terrain.terrainData;
 //			_texture.setTextures(_data);
-			GetComponent<TerrainTextures>().setTextures(tile.terrain.GetComponent<Terrain>().terrainData, tile.diffuseMap);
+			GetComponent<TerrainTextures>().setTextures(tile.terrain.GetComponent<Terrain>().terrainData, tile.diffuseMap, terrainSize);
         }
         
     }
