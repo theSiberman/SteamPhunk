@@ -44,9 +44,9 @@ public class TerrainLoader : MonoBehaviour {
 	public Planet planet;
 
 	private int tileSize = 256;
-	private int terrainSize = 256;
+	public int terrainSize = 512;
 	private int terrainResolution = 256;
-	private int terrainHeight = 100;
+	public int terrainHeight = 512;
 
 	public int tileMargin;
 	public int startX;
@@ -142,10 +142,9 @@ public class TerrainLoader : MonoBehaviour {
         }
         else
         {
-			//This function seems to be scaling the altimiter resolution up to the desired texture resolution
-            for (int y = 0; y < terrainResolution; y++)
+            for (int y = 0; y <= terrainResolution; y++)
             {
-                for (int x = 0; x < terrainResolution; x++)
+                for (int x = 0; x <= terrainResolution; x++)
                 {
                     if (x == terrainResolution && y == terrainResolution)
                     {
@@ -153,8 +152,6 @@ public class TerrainLoader : MonoBehaviour {
                     }
                     else if (x == terrainResolution)
                     {
-//						Debug.Log("x: " + x + " y: " + y + " tileSize: " + tileSize + " altimiterPixelByteArray.length: " + altimiterPixelByteArray.Length + " index[y * tileSize + (x-1)]: " + (y * tileSize + (x-1)));
-//						Debug.Log(terrainHeights.GetLength(0) + " " + terrainHeights.GetLength(1));
 						terrainHeights[y, x] = altimiterPixelByteArray[(y) * tileSize + (x - 1)].grayscale;
                     }
                     else if (y == terrainResolution)
@@ -162,13 +159,8 @@ public class TerrainLoader : MonoBehaviour {
 						terrainHeights[y, x] = altimiterPixelByteArray[((y - 1) * tileSize) + x].grayscale;
                     }
                     else
-                    {
-						try{
-							terrainHeights[y, x] = altimiterPixelByteArray[y * tileSize + x].grayscale;
-						}catch (Exception e){
-							Debug.Log("x: " + x + " y: " + y + " tileSize: " + tileSize + " altimiterPixelByteArray.length: " + altimiterPixelByteArray.Length + " index[y * tileSize + x]: " + (y * tileSize + x));
-							Debug.Log(e);
-						}
+                    {	
+						terrainHeights[y, x] = altimiterPixelByteArray[y * tileSize + x].grayscale;
                     }
                 }
             }

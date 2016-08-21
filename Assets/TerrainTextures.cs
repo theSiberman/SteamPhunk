@@ -16,25 +16,29 @@ using System.Linq; // used for Sum of array
         var flatSplat = new SplatPrototype();
         var steepSplat = new SplatPrototype();
         var baseSplat = new SplatPrototype();
+		var spaceSplat = new SplatPrototype();
 
-		baseSplat.texture = diffuseMap;
-		baseSplat.normalMap = diffuseMap;
-		baseSplat.tileSize = new Vector2( tileSize, tileSize );
+		spaceSplat.texture = diffuseMap;
+		baseSplat.normalMap = baseNormal;
+		spaceSplat.tileSize = new Vector2( tileSize, tileSize );
 
-		flatSplat.texture = diffuseMap;
-//		flatSplat.normalMap = flatNormal;
-		flatSplat.tileSize = new Vector2( tileSize, tileSize );
+		baseSplat.texture = baseTexture;
+		baseSplat.normalMap = baseNormal;
 
-		steepSplat.texture = diffuseMap;
-//		steepSplat.normalMap = steepNormal;
-		steepSplat.tileSize = new Vector2( tileSize, tileSize );
+
+		flatSplat.texture = flatTexture;
+		flatSplat.normalMap = flatNormal;
+
+		steepSplat.texture = steepTexture;
+		steepSplat.normalMap = steepNormal;
+
 
         terrainData.splatPrototypes = new SplatPrototype[]
         {
             baseSplat,
             flatSplat,
-            flatSplat,
-            steepSplat
+            steepSplat,
+			spaceSplat
         };
 		Debug.Log(terrainData.alphamapWidth);
 
@@ -64,7 +68,7 @@ using System.Linq; // used for Sum of array
                     // CHANGE THE RULES BELOW TO SET THE WEIGHTS OF EACH TEXTURE ON WHATEVER RULES YOU WANT
 
                     // Texture[0] has constant influence
-                    splatWeights[0] = 1.0f;
+                    splatWeights[0] = 0.3f;
 
                     // Texture[1] is stronger at lower altitudes
                     splatWeights[1] = Mathf.Clamp01((terrainData.heightmapHeight - height));
@@ -72,14 +76,15 @@ using System.Linq; // used for Sum of array
                     // Texture[2] stronger on flatter terrain
                     // Note "steepness" is unbounded, so we "normalise" it by dividing by the extent of heightmap height and scale factor
                     // Subtract result from 1.0 to give greater weighting to flat surfaces
-                    splatWeights[2] = 1.0f - Mathf.Clamp01(steepness * steepness / (terrainData.heightmapHeight / 5.0f));
+                    splatWeights[2] = 0.5f - Mathf.Clamp01(steepness * steepness / (terrainData.heightmapHeight / 5.0f));
 
                     // Texture[3] increases with height but only on surfaces facing positive Z axis 
 //                    splatWeights[3] = height * Mathf.Clamp01(normal.z);
-					splatWeights[3] = 0.1f;
+					splatWeights[3] = 2.1f;
 
                     // Sum of all textures weights must add to 1, so calculate normalization factor from sum of weights
                     float z = splatWeights.Sum();
+					
 
                     // Loop through each terrain texture
                     for (int i = 0; i < terrainData.alphamapLayers; i++)
