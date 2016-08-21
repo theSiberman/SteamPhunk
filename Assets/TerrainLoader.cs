@@ -43,10 +43,10 @@ public class TerrainLoader : MonoBehaviour {
 	public enum Planet{MARS,VESTA};
 	public Planet planet;
 
-	public int tileSize = 256;
-	public int terrainSize = 256;
-	public int terrainResolution = 2048;
-	public int terrainHeight = 100;
+	private int tileSize = 256;
+	private int terrainSize = 256;
+	private int terrainResolution = 256;
+	private int terrainHeight = 100;
 
 	public int tileMargin;
 	public int startX;
@@ -95,15 +95,16 @@ public class TerrainLoader : MonoBehaviour {
 		string filePath = Application.persistentDataPath + "/" + planet.ToString() + "_" + type + "_" + tileImagePath.Replace("/","_");
 
 		//Get the cached file
-		if( System.IO.File.Exists( filePath ) ){
-			texture.LoadImage(File.ReadAllBytes( filePath ));
-		} else {
+		if( !System.IO.File.Exists( filePath ) || updateCache ){
+			Debug.Log("Updating Cache: " + filePath);
 			// Download the tile texture of type = type using the urls returned from the 'urls' method which switches on the
 			// planet passed to it, in this case, the one selected in the inspector ( the public planet )
 			WWW www = new WWW(url + tileImagePath);
 			while (!www.isDone) { }
 			www.LoadImageIntoTexture(texture);
 			System.IO.File.WriteAllBytes(filePath, texture.EncodeToPNG());
+		} else {
+			texture.LoadImage(File.ReadAllBytes( filePath ));
 		}
 		return texture;
 	}
@@ -142,9 +143,9 @@ public class TerrainLoader : MonoBehaviour {
         else
         {
 			//This function seems to be scaling the altimiter resolution up to the desired texture resolution
-            for (int y = 0; y <= terrainResolution; y++)
+            for (int y = 0; y < terrainResolution; y++)
             {
-                for (int x = 0; x <= terrainResolution; x++)
+                for (int x = 0; x < terrainResolution; x++)
                 {
                     if (x == terrainResolution && y == terrainResolution)
                     {
@@ -152,6 +153,8 @@ public class TerrainLoader : MonoBehaviour {
                     }
                     else if (x == terrainResolution)
                     {
+//						Debug.Log("x: " + x + " y: " + y + " tileSize: " + tileSize + " altimiterPixelByteArray.length: " + altimiterPixelByteArray.Length + " index[y * tileSize + (x-1)]: " + (y * tileSize + (x-1)));
+//						Debug.Log(terrainHeights.GetLength(0) + " " + terrainHeights.GetLength(1));
 						terrainHeights[y, x] = altimiterPixelByteArray[(y) * tileSize + (x - 1)].grayscale;
                     }
                     else if (y == terrainResolution)
@@ -160,7 +163,12 @@ public class TerrainLoader : MonoBehaviour {
                     }
                     else
                     {
-						terrainHeights[y, x] = altimiterPixelByteArray[y * tileSize + x].grayscale;
+						try{
+							terrainHeights[y, x] = altimiterPixelByteArray[y * tileSize + x].grayscale;
+						}catch (Exception e){
+							Debug.Log("x: " + x + " y: " + y + " tileSize: " + tileSize + " altimiterPixelByteArray.length: " + altimiterPixelByteArray.Length + " index[y * tileSize + x]: " + (y * tileSize + x));
+							Debug.Log(e);
+						}
                     }
                 }
             }
